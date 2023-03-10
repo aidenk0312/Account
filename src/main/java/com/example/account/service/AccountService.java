@@ -76,6 +76,8 @@ public class AccountService {
         account.setAccountStatus(AccountStatus.UNREGISTERED);
         account.setUnRegisteredAt(LocalDateTime.now());
 
+        accountRepository.save(account);
+
         return AccountDto.fromEntity(account);
     }
 
