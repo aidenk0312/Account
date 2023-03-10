@@ -100,7 +100,7 @@ public class TransactionService {
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
 
-        validateCancelalance(transaction, account, amount);
+        validateCancelBalance(transaction, account, amount);
 
         account.cancelBalance(amount);
 
@@ -109,11 +109,11 @@ public class TransactionService {
         );
     }
 
-    private void validateCancelalance(Transaction transaction, Account account, Long amount) {
+    private void validateCancelBalance(Transaction transaction, Account account, Long amount) {
         if (!Objects.equals(transaction.getAccount().getId(), account.getId())) {
             throw new AccountException(ErrorCode.TRANSACTION_ACCOUNT_UN_MATCH);
         }
-        if (!Objects.equals(transaction.getAccount(), amount)) {
+        if (!Objects.equals(transaction.getAmount(), amount)) {
             throw new AccountException(ErrorCode.CANCEL_MUST_FULLY);
         }
         if (transaction.getTransactionAt().isBefore(LocalDateTime.now().minusYears(1))) {

@@ -24,6 +24,7 @@ import java.util.Optional;
 import static com.example.account.type.AccountStatus.IN_USE;
 import static com.example.account.type.TransactionResultType.F;
 import static com.example.account.type.TransactionResultType.S;
+import static com.example.account.type.TransactionType.CANCEL;
 import static com.example.account.type.TransactionType.USE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -34,6 +35,8 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
     public static final long USE_AMOUNT = 200L;
+    public static final long CANCEL_AMOUNT = 200L;
+
     @Mock
     private TransactionRepository transactionRepository;
 
@@ -256,5 +259,61 @@ class TransactionServiceTest {
         assertEquals(USE_AMOUNT, captor.getValue().getAmount());
         assertEquals(10000L, captor.getValue().getBalanceSnapshot());
         assertEquals(F, captor.getValue().getTransactionResultType());
+    }
+
+    @Test
+    void successCancelBalance() {
+        //given
+        AccountUser user = AccountUser.builder()
+                .id(12L)
+                .name("Pobi").build();
+
+        Account account = Account.builder()
+                .accountUser(user)
+                .accountStatus(IN_USE)
+                .balance(10000L)
+                .accountNumber("1000000012").build();
+
+        Transaction transaction = Transaction.builder()
+                .account(account)
+                .transactionType(USE)
+                .transactionResultType(S)
+                .transactionId("transactionId")
+                .transactionAt(LocalDateTime.now())
+                .amount(CANCEL_AMOUNT)
+                .balanceSnapshot(9000L)
+                .build();
+
+        given(transactionRepository.findByTransactionId(anyString()))
+                .willReturn(Optional.of(transaction));
+
+        given(accountRepository.findByAccountNumber(anyString()))
+                .willReturn(Optional.of(account));
+
+        given(transactionRepository.save(any()))
+                .willReturn(Transaction.builder()
+                        .account(account)
+                        .transactionType(CANCEL)
+                        .transactionResultType(S)
+                        .transactionId("transactionIdForCancel")
+                        .transactionAt(LocalDateTime.now())
+                        .amount(CANCEL_AMOUNT)
+                        .balanceSnapshot(10000L)
+                        .build());
+
+        ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
+
+        //when
+        TransactionDto transactionDto = transactionService.cancelBalance(
+                "transactionId", "1000000000", CANCEL_AMOUNT);
+
+        //then
+        verify(transactionRepository, times(1)).save(captor.capture());
+        assertEquals(CANCEL_AMOUNT, captor.getValue().getAmount());
+        assertEquals(10000L + CANCEL_AMOUNT, captor.getValue().getBalanceSnapshot());
+        assertEquals(S, transactionDto.getTransactionResultType());
+        assertEquals(CANCEL, transactionDto.getTransactionType());
+        assertEquals(10000L, transactionDto.getBalanceSnapshot());
+        assertEquals(CANCEL_AMOUNT, transactionDto.getAmount());
     }
 }
