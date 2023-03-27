@@ -10,13 +10,13 @@ Redis,
 JPA
 
 ## 3. API 목록 및 상세 내용
- - 계좌 생성: POST /account
- - 계좌 삭제: DELETE /account
- - 계좌 조회: GET /account
- - 특정 계좌 조회: GET /account/{id}
- - 잔액 사용: POST /transaction/use
- - 잔액 사용 취소: POST /transaction/cancel
- - 거래 확인: GET /transaction/{transactionId}
+ - [x] 계좌 생성: POST /account
+ - [x] 계좌 삭제: DELETE /account
+ - [x] 계좌 조회: GET /account
+ - [x] 특정 계좌 조회: GET /account/{id}
+ - [x] 잔액 사용: POST /transaction/use
+ - [x] 잔액 사용 취소: POST /transaction/cancel
+ - [x] 거래 확인: GET /transaction/{transactionId}
 
 ## 4. 검증 결과
  - 프로젝트에서 사용된 모든 API는 정상적으로 동작하며, 예외 처리 및 유효성 검사를 통해 실제 은행 시스템에 적합한 안정성과 성능을 가지도록 구현되었습니다.
